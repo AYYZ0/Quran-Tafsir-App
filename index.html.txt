@@ -1,0 +1,1170 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-key="app_title">مفسر الآيات متعدد اللغات والمناهج</title>
+    <!-- تحميل Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- تفعيل خط Cairo وخط Amiri Quran -->
+    <style>
+        /* الخط الأساسي */
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap');
+        /* خط مصحف إضافي جميل لعرض الآيات الأصلية */
+        @import url('https://fonts.googleapis.com/css2?family=Amiri+Quran:wght@400;700&display=swap');
+
+        /* Default (Light Mode) */
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: #fcfbf9; 
+            direction: rtl;
+            text-align: right;
+            user-select: none; 
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            color: #1f2937; /* Default text color */
+        }
+        .app-card {
+             background-color: #ffffff;
+             box-shadow: 0 10px 40px rgba(74, 85, 104, 0.15); 
+        }
+        .input-bg { background-color: #f9fafb; }
+        .text-prime { color: #0d9488; }
+        .border-prime { border-color: #0d9488; }
+        .result-ayah-bg { background-color: #e0f2f1; } 
+        .result-tafsir-bg { background-color: #f0fdfa; } 
+        .history-item { background-color: #f9fafb; border-color: #e5e7eb; }
+        .history-item:hover { background-color: #f0fdfa; }
+
+        /* Dark Mode Colors */
+        body.dark-mode {
+            background-color: #121212; 
+            color: #e0e0e0; 
+        }
+        .dark-mode .app-card { 
+            background-color: #1e1e1e !important; 
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+        }
+        .dark-mode h1, .dark-mode h2, .dark-mode h3 { color: #f0f0f0 !important; }
+        .dark-mode p { color: #b0b0b0 !important; }
+        .dark-mode .border-b, .dark-mode .border-t { border-color: #333 !important; }
+        .dark-mode .input-bg { background-color: #2c2c2c !important; }
+        .dark-mode .text-gray-700 { color: #e0e0e0 !important; }
+        .dark-mode .border-gray-300 { border-color: #444 !important; }
+        .dark-mode textarea, .dark-mode input, .dark-mode select { 
+            background-color: #333 !important; 
+            color: #e0e0e0 !important;
+            border-color: #555 !important;
+        }
+
+        .dark-mode .result-ayah-bg { 
+            background-color: #004d40 !important; 
+            border-color: #009688 !important; 
+            color: #fff !important;
+        }
+        .dark-mode .result-tafsir-bg { 
+            background-color: #1a1a1a !important; 
+            border-color: #00bcd4 !important; 
+            color: #e0e0e0 !important; 
+        }
+        .dark-mode .text-teal-700 { color: #80cbc4 !important; } 
+        .dark-mode .text-red-600 { color: #f87171 !important; }
+        .dark-mode .text-gray-900 { color: #fff !important; }
+        .dark-mode .text-gray-700 { color: #f0f0f0 !important; }
+
+
+        /* Radio Buttons */
+        .radio-label {
+            display: block; padding: 8px 12px; border-radius: 8px; cursor: pointer; transition: all 0.2s; font-weight: 500; text-align: center; border: 1px solid #d1d5db;
+            background-color: #fff;
+        }
+        .dark-mode .radio-label { background-color: #2c2c2c; border-color: #444; color: #e0e0e0; }
+        input[type="radio"]:checked + .radio-label { background-color: #0d9488; color: white; border-color: #0f766e; box-shadow: 0 2px 5px rgba(13, 148, 136, 0.4); }
+        input[type="radio"] { display: none; }
+        
+        /* General Overrides */
+        .ayah-font { 
+            font-family: 'Amiri Quran', serif; 
+            font-size: 1.8rem; 
+            line-height: 2.2; /* تقليل المسافة بين السطور */
+            /* إلغاء التنسيق العمودي */
+            white-space: normal; 
+            display: block;
+            text-align: center;
+        }
+        /* لا حاجة لـ .ayah-word الآن */
+
+        .tafsir-text { /* class for dynamic font size */
+            font-size: 1rem; /* Base size */
+            line-height: 1.8;
+            transition: font-size 0.2s;
+        }
+        /* Class to control font size for the info table */
+        #info-table-output { /* Targeting the container directly */
+            font-size: 1rem; /* Base size */
+            transition: font-size 0.2s;
+        }
+        
+        /* Table styling for colored cells - تم تحديث هذا القسم */
+        #info-table-output .info-key-cell { 
+            /* تم تغميق اللون في الوضع العادي ليكون أكثر وضوحاً */
+            background-color: #011d1c; /* Very Dark Teal (Teal-900 equivalent) for Key */ 
+            color: white !important;
+            font-weight: 600;
+            width: 35%; /* تخصيص عرض عمود المعلومة */
+        }
+        #info-table-output .info-value-cell {
+            background-color: #ffffff; /* White/Cream for Value */
+            color: #1f2937 !important; /* لون النص في الوضع العادي */
+        }
+        .dark-mode #info-table-output .info-key-cell { 
+            background-color: #00332e !important; /* Very Dark Teal for Key in Dark Mode */
+            color: #b0e0d0 !important;
+        }
+        .dark-mode #info-table-output .info-value-cell {
+             background-color: #1a1a1a !important; 
+             color: #e0e0e0 !important; /* لون النص في الوضع الليلي */
+        }
+
+        .spinner { 
+            border: 4px solid rgba(255, 255, 255, 0.3); 
+            border-top: 4px solid #ffffff; 
+            border-radius: 50%; 
+            width: 24px; height: 24px; 
+            animation: spin 1s linear infinite; 
+        }
+        .dark-mode #audio-loading-spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid #0d9488; /* Teal top border */
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        /* Selectable Text for Inputs/History ONLY */
+        textarea, input[type="text"], input[type="number"], select, #history-list .history-item {
+            user-select: auto !important; -webkit-user-select: auto !important; -moz-user-select: auto !important; -ms-user-select: auto !important;
+        }
+        .dark-mode #history-list .history-item { background-color: #2c2c2c !important; border-color: #444 !important; }
+        .dark-mode #history-list .history-item:hover { background-color: #004d40 !important; }
+    </style>
+</head>
+<body class="p-4 sm:p-8 min-h-screen flex justify-center items-start" oncontextmenu="return false;">
+
+    <div class="w-full max-w-3xl rounded-xl p-6 sm:p-10 mt-4 app-card">
+        
+        <!-- Dark Mode Toggle -->
+        <div class="flex justify-between items-center mb-4">
+            <h1 class="text-3xl font-bold text-gray-800 border-b pb-3 mb-0 flex-grow text-center" data-key="app_title">مفسِّر الآيات القرآنيّة الذكي</h1>
+            <button id="theme-toggle" class="p-2 rounded-full text-gray-700 hover:text-teal-600 transition duration-150 absolute top-6 left-6" title="تغيير المظهر">
+                <!-- Icon: Sun for light mode, Moon for dark mode -->
+                <svg id="sun-icon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                <svg id="moon-icon" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+            </button>
+        </div>
+        
+        <p class="text-gray-600 mb-8 text-center text-sm" data-key="intro_text">
+            الرجاء اختيار لغة الإخراج ومنهج التفسير.
+        </p>
+
+        <!-- منطقة اختيار اللغة والتفسير (تم عكس الترتيب) -->
+        <div class="space-y-8 mb-8">
+             <!-- اختيار لغة التفسير (أولاً) -->
+            <div>
+                <h3 class="text-lg font-bold text-gray-700 mb-3 border-r-4 border-teal-500 pr-2 border-prime" data-key="section_1_title">1. اختر لغة الإخراج:</h3>
+                <div class="grid grid-cols-3 md:grid-cols-6 gap-3">
+                    <!-- تمت إزالة خاصية checked -->
+                    <div><input type="radio" id="lang_ar" name="output_lang" value="ar" onchange="checkInputValidity(); changeLanguage('ar');"><label for="lang_ar" class="radio-label">العربية</label></div>
+                    <div><input type="radio" id="lang_en" name="output_lang" value="en" onchange="checkInputValidity(); changeLanguage('en');"><label for="lang_en" class="radio-label">English</label></div>
+                    <div><input type="radio" id="lang_fr" name="output_lang" value="fr" onchange="checkInputValidity(); changeLanguage('fr');"><label for="lang_fr" class="radio-label">Français</label></div>
+                    <div><input type="radio" id="lang_ps" name="output_lang" value="ps" onchange="checkInputValidity(); changeLanguage('ps');"><label for="lang_ps" class="radio-label">پښتو</label></div>
+                    <div><input type="radio" id="lang_ur" name="output_lang" value="ur" onchange="checkInputValidity(); changeLanguage('ur');"><label for="lang_ur" class="radio-label">اردو</label></div>
+                    <div><input type="radio" id="lang_ce" name="output_lang" value="ce" onchange="checkInputValidity(); changeLanguage('ce');"><label for="lang_ce" class="radio-label">Нохчийн</label></div>
+                </div>
+            </div>
+
+            <!-- اختيار منهج التفسير (ثانياً) -->
+            <div>
+                <h3 class="text-lg font-bold text-gray-700 mb-3 border-r-4 border-teal-500 pr-2 border-prime" data-key="section_2_title">2. اختر منهج التفسير:</h3>
+                <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
+                    <!-- تم الإبقاء على ابن كثير والميسر فقط -->
+                    <div><input type="radio" id="tafsir_ibn_kathir" name="tafsir_type" value="ibn_kathir" onchange="checkInputValidity()"><label for="tafsir_ibn_kathir" class="radio-label" data-key="tafsir_ibn_kathir">ابن كثير</label></div>
+                    <div><input type="radio" id="tafsir_muyassar" name="tafsir_type" value="muyassar" onchange="checkInputValidity()"><label for="tafsir_muyassar" class="radio-label" data-key="tafsir_muyassar">الميسر</label></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- منطقة إدخال الآية -->
+        <div id="input-section" class="space-y-4 mb-6 p-4 rounded-lg input-bg">
+            
+            <h3 class="text-lg font-bold text-gray-700 mb-3 border-r-4 border-teal-500 pr-2 border-prime" data-key="section_3_title">3. أدخل الآية:</h3>
+            
+            <!-- إدخال الآية مباشرة (أفضل طريقة) -->
+            <div>
+                <label for="ayah-text" class="block text-sm font-medium text-gray-700 mb-1" data-key="input_text_label">اكتب نص الآية مباشرة:</label>
+                <textarea id="ayah-text" rows="3" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-teal-500 focus:border-teal-500 text-base" placeholder="مثال: قُلْ هُوَ اللَّهُ أَحَدٌ"></textarea>
+            </div>
+            
+            <div class="text-center text-sm text-gray-500">
+                <span class="inline-block p-1 rounded-md bg-gray-200 dark:bg-gray-700" data-key="or_separator">أو</span>
+            </div>
+
+            <!-- إدخال السورة والرقم (بديل) -->
+            <div class="flex flex-col sm:flex-row gap-4">
+                <div class="w-full sm:w-1/2">
+                    <label for="surah-name" class="block text-sm font-medium text-gray-700 mb-1" data-key="surah_label">اختر السورة:</label>
+                    <!-- تم استبدال حقل النص بقائمة منسدلة -->
+                    <select id="surah-name" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-teal-500 focus:border-teal-500" onchange="checkInputValidity()">
+                         <!-- القائمة سيتم ملؤها بواسطة JavaScript -->
+                    </select>
+                </div>
+                <div class="w-full sm:w-1/2">
+                    <label for="ayah-number" class="block text-sm font-medium text-gray-700 mb-1" data-key="ayah_number_label">رقم الآية:</label>
+                    <input type="number" id="ayah-number" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-teal-500 focus:border-teal-500" placeholder="مثال: 1" min="1">
+                </div>
+            </div>
+            
+            <button id="get-tafsir-btn" onclick="fetchTafsir()" class="w-full bg-teal-600 text-white py-3 mt-4 rounded-xl font-bold hover:bg-teal-700 transition duration-200 flex items-center justify-center disabled:opacity-50" disabled>
+                <span id="button-text" data-key="get_tafsir_btn">احصل على التفسير</span>
+                <div id="loading-spinner" class="spinner hidden"></div>
+            </button>
+            <p id="error-message" class="text-red-600 text-center mt-3 hidden text-sm"></p>
+
+        </div>
+
+        <!-- منطقة النتيجة -->
+        <div id="result-section" class="hidden">
+            <h2 class="text-xl font-bold text-gray-800 mb-4 border-b-2 border-teal-500 pb-2 border-prime" data-key="generated_tafsir_heading">التفسير المُولَّد:</h2>
+            
+            <!-- أزرار التحكم بالخط وتشغيل الصوت -->
+            <div class="flex justify-start mb-3 space-x-3 space-x-reverse items-center" id="result-controls">
+                <!-- Font Controls -->
+                <button onclick="changeFontSize(1)" class="p-1.5 bg-gray-200 rounded-full text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-200 transition duration-150 text-xl font-bold" title="تكبير الخط">
+                    +A
+                </button>
+                <button onclick="changeFontSize(-1)" class="p-1.5 bg-gray-200 rounded-full text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-200 transition duration-150 text-xl font-bold" title="تصغير الخط">
+                    -A
+                </button>
+                <!-- TTS Button -->
+                 <button id="speak-tafsir-btn" onclick="speakTafsir()" class="flex items-center space-x-2 space-x-reverse bg-teal-600 text-white px-4 py-2 rounded-full text-sm font-semibold hover:bg-teal-700 transition duration-200 disabled:opacity-50" title="تشغيل التفسير صوتياً">
+                    <svg id="audio-icon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.636 12 4.14 12 5.5v13c0 1.36-1.077 1.864-1.707 1.293l-4.707-4.707z"></path></svg>
+                    <span id="speak-tafsir-text" data-key="audio_button_play">تشغيل الصوت</span>
+                </button>
+                <div id="audio-loading-spinner" class="spinner hidden w-6 h-6 border-teal-600 border-t-white"></div>
+            </div>
+
+            <!-- معلومات السورة (الجدول الأنيق) -->
+            <div id="info-table-output" class="p-4 mb-4 rounded-lg border-l-4 border-teal-600 text-gray-800 result-ayah-bg border-prime">
+                 <!-- الجدول سيتم إدخاله هنا -->
+            </div>
+
+            <!-- نص الآية الأصلية -->
+            <div id="original-ayah-output" class="p-4 mb-4 rounded-lg border-l-4 border-teal-600 text-gray-800 text-center result-ayah-bg border-prime">
+                 <p class="ayah-font text-gray-900"></p>
+            </div>
+
+            <!-- التفسير -->
+            <div id="tafsir-output" class="p-4 rounded-lg border-l-4 border-teal-600 text-gray-800 result-tafsir-bg border-prime">
+                <p class="tafsir-text"></p>
+            </div>
+            
+            <!-- مصادر التفسير (إذا تم توفيرها من AI) -->
+            <div id="sources-container" class="mt-6 p-4 bg-gray-100 rounded-lg border border-gray-200 hidden dark:bg-gray-800 dark:border-gray-700">
+                <h3 class="text-sm font-semibold text-gray-700 mb-2" data-key="sources_heading">المصادر المرجعية (Google Search Grounding):</h3>
+                <ul id="sources-list" class="list-disc pr-5 space-y-1 text-sm text-gray-600"></ul>
+            </div>
+            
+            <button onclick="resetApp()" class="w-full bg-blue-700 text-white py-2 mt-6 rounded-lg font-semibold hover:bg-blue-800 transition duration-200" data-key="reset_button">
+                تفسير آية جديدة
+            </button>
+        </div>
+        
+        <!-- سجل البحث المحفوظ -->
+        <div class="mt-10 pt-6 border-t border-gray-200 dark:border-gray-700">
+            <h2 class="text-xl font-bold text-gray-700 mb-4 border-r-4 border-gray-400 pr-2" data-key="history_heading">سجل التفسيرات (محفوظة محلياً)</h2>
+            <div id="history-container" class="space-y-3">
+                <p id="no-history" class="text-gray-500 text-sm italic" data-key="no_history">لا يوجد سجل محفوظ بعد.</p>
+                <div id="history-list" class="space-y-3">
+                    <!-- سجل التفسيرات سيتم تحميله هنا -->
+                </div>
+            </div>
+            <!-- تم إزالة زر مسح السجل بناءً على طلب المستخدم -->
+        </div>
+
+    </div>
+
+    <script>
+        // إعدادات API (الـ API Key سيتم توفيره تلقائياً من نظام التشغيل)
+        const apiKey = ""; 
+        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+        const TTS_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`;
+
+        // متغيرات التخزين المؤقت للصوت
+        let lastTafsirText = '';
+        let lastTafsirAudioUrl = null;
+        let currentLang = null; // لا توجد لغة محددة في البداية
+
+        // الكائنات الأساسية
+        const tafsirMap = {
+            'ibn_kathir': 'تفسير ابن كثير (Hadith-based and detailed)',
+            'muyassar': 'التفسير الميسر (Simplified and easy-to-read)', // تم الإبقاء عليه
+        };
+        
+        const langMap = {
+            'ar': 'باللغة العربية الفصحى',
+            'en': 'in English',
+            'fr': 'en Français',
+            'ps': 'in Pashto (پښتو)', 
+            'ur': 'in Urdu (اردو)',     
+            'ce': 'in Chechen (Нохчийн)',
+        };
+
+        const surahNames = [
+            "اختر سورة...", "الفاتحة", "البقرة", "آل عمران", "النساء", "المائدة", "الأنعام", "الأعراف", "الأنفال", "التوبة", "يونس", "هود", "يوسف", "الرعد", "إبراهيم", "الحجر", "النحل", "الإسراء", "الكهف", "مريم", "طه", "الأنبياء", "الحج", "المؤمنون", "النور", "الفرقان", "الشعراء", "النمل", "القصص", "العنكبوت", "الروم", "لقمان", "السجدة", "الأحزاب", "سبأ", "فاطر", "يس", "الصافات", "ص", "الزمر", "غافر", "فصلت", "الشورى", "الزخرف", "الدخان", "الجاثية", "الأحقاف", "محمد", "الفتح", "الحجرات", "ق", "الذاريات", "الطور", "النجم", "القمر", "الرحمن", "الواقعة", "الحديد", "المجادلة", "الحشر", "الممتحنة", "الصف", "الجمعة", "المنافقون", "التغابن", "الطلاق", "التحريم", "الملك", "القلم", "الحاقة", "المعارج", "نوح", "الجن", "المزمل", "المدثر", "القيامة", "الإنسان", "المرسلات", "النبأ", "النازعات", "عبس", "التكوير", "الإنفطار", "المطففين", "الإنشقاق", "البروج", "الطارق", "الأعلى", "الغاشية", "الفجر", "البلد", "الشمس", "الليل", "الضحى", "الشرح", "التين", "العلق", "القدر", "البينة", "الزلزلة", "العاديات", "القارعة", "التكاثر", "العصر", "الهمزة", "الفيل", "قريش", "الماعون", "الكوثر", "الكافرون", "النصر", "المسد", "الإخلاص", "الفلق", "الناس"
+        ];
+        
+        /**
+         * تملأ القائمة المنسدلة لأسماء السور.
+         */
+        function populateSurahDropdown() {
+            surahNames.forEach((name, index) => {
+                const option = document.createElement('option');
+                // قيمة السورة تبدأ من 1 (الفاتحة)
+                option.value = index === 0 ? "" : name; 
+                option.textContent = name;
+                if (index === 0) {
+                     option.disabled = true;
+                }
+                surahNameSelect.appendChild(option);
+            });
+        }
+        
+        const translations = {
+            'ar': {
+                'app_title': 'مفسِّر الآيات القرآنيّة الذكي', 'intro_text': 'الرجاء اختيار لغة الإخراج ومنهج التفسير.',
+                'section_1_title': '1. اختر لغة الإخراج:', 'section_2_title': '2. اختر منهج التفسير:', 'section_3_title': '3. أدخل الآية:',
+                'input_text_label': 'اكتب نص الآية مباشرة:', 'or_separator': 'أو', 'surah_label': 'اختر السورة:', 
+                'ayah_number_label': 'رقم الآية:', 'get_tafsir_btn': 'احصل على التفسير', 'loading_text': 'جاري التفسير...', 
+                'error_choose': 'الرجاء اختيار منهج التفسير ولغة الإخراج.', 'generated_tafsir_heading': 'التفسير المُولَّد:', 
+                'audio_button_play': 'تشغيل الصوت', 'audio_button_pause': 'إيقاف مؤقت', 'audio_button_resume': 'استئناف',
+                'audio_button_error': 'خطأ في الصوت', 'reset_button': 'تفسير آية جديدة', 'history_heading': 'سجل التفسيرات (محفوظة محلياً)',
+                'no_history': 'لا يوجد سجل محفوظ بعد.', 'clear_history': 'مسح السجل', 'error_ayah_input': 'الرجاء إدخال نص الآية أو اسم السورة ورقم الآية.',
+                'tafsir_ibn_kathir': 'ابن كثير', 'tafsir_muyassar': 'الميسر', 'sources_heading': 'المصادر المرجعية (Google Search Grounding):',
+            },
+            'en': {
+                'app_title': 'Smart Quranic Verse Interpreter', 'intro_text': 'Please select the output language and Tafsir methodology.',
+                'section_1_title': '1. Choose Output Language:', 'section_2_title': '2. Choose Tafsir Methodology:', 'section_3_title': '3. Enter the Verse:',
+                'input_text_label': 'Write the verse text directly:', 'or_separator': 'OR', 'surah_label': 'Select Surah:', 
+                'ayah_number_label': 'Verse Number:', 'get_tafsir_btn': 'Get Tafsir', 'loading_text': 'Interpreting...', 
+                'error_choose': 'Please select the Tafsir methodology and output language.', 'generated_tafsir_heading': 'Generated Tafsir:', 
+                'audio_button_play': 'Play Audio', 'audio_button_pause': 'Pause', 'audio_button_resume': 'Resume',
+                'audio_button_error': 'Audio Error', 'reset_button': 'New Verse Interpretation', 'history_heading': 'Tafsir History (Locally Saved)',
+                'no_history': 'No history saved yet.', 'clear_history': 'Clear History', 'error_ayah_input': 'Please enter the verse text or the Surah name and verse number.',
+                'tafsir_ibn_kathir': 'Ibn Kathir', 'tafsir_muyassar': 'Al-Muyassar', 'sources_heading': 'Reference Sources (Google Search Grounding):',
+            },
+            'fr': {
+                'app_title': 'Interprète intelligent de versets coraniques', 'intro_text': 'Veuillez sélectionner la langue de sortie et la méthodologie de Tafsir.',
+                'section_1_title': '1. Choisissez la langue de sortie :', 'section_2_title': '2. Choisissez la méthodologie de Tafsir :', 'section_3_title': '3. Entrez le verset :',
+                'input_text_label': 'Écrivez le texte du verset directement :', 'or_separator': 'OU', 'surah_label': 'Sélectionnez la Sourate :', 
+                'ayah_number_label': 'Numéro du verset :', 'get_tafsir_btn': 'Obtenir le Tafsir', 'loading_text': 'Interprétation en cours...', 
+                'error_choose': 'Veuillez sélectionner la méthodologie et la langue de sortie.', 'generated_tafsir_heading': 'Tafsir généré :', 
+                'audio_button_play': 'Jouer l\'audio', 'audio_button_pause': 'Pause', 'audio_button_resume': 'Reprendre',
+                'audio_button_error': 'Erreur audio', 'reset_button': 'Nouvelle interprétation de verset', 'history_heading': 'Historique du Tafsir (sauvegardé localement)',
+                'no_history': 'Aucun historique n\'est encore enregistré.', 'clear_history': 'Effacer l\'historique', 'error_ayah_input': 'Veuillez entrer le texte du verset ou le nom de la Sourate et le numéro du verset.',
+                'tafsir_ibn_kathir': 'Ibn Kathir', 'tafsir_muyassar': 'Al-Muyassar', 'sources_heading': 'Sources de référence (Google Search Grounding):',
+            },
+            'ps': {
+                'app_title': 'هوښیار قرآني آیت ژباړونکی', 'intro_text': 'مهرباني وکړئ د محصول ژبه او د تفسیر میتود غوره کړئ.',
+                'section_1_title': '۱. د محصول ژبه وټاکئ:', 'section_2_title': '۲. د تفسیر میتود وټاکئ:', 'section_3_title': '۳. آیت داخل کړئ:',
+                'input_text_label': 'په مستقیم ډول د آیت متن ولیکئ:', 'or_separator': 'یا', 'surah_label': 'سورت وټاکئ:', 
+                'ayah_number_label': 'آیت شمیره:', 'get_tafsir_btn': 'تفسیر ترلاسه کړئ', 'loading_text': 'تفسیر کیږي...', 
+                'error_choose': 'مهرباني وکړئ د تفسیر میتود او د محصول ژبه وټاکئ.', 'generated_tafsir_heading': 'تولید شوی تفسیر:', 
+                'audio_button_play': 'غږول', 'audio_button_pause': 'ودرول', 'audio_button_resume': 'بیا پیل',
+                'audio_button_error': 'د غږ تېروتنه', 'reset_button': 'د نوي آیت تفسیر', 'history_heading': 'د تفسیر تاریخ (په محلي توګه خوندي شوی)',
+                'no_history': 'تر اوسه کوم تاریخ خوندي شوی نه دی.', 'clear_history': 'تاریخ پاک کړئ', 'error_ayah_input': 'مهرباني وکړئ د آیت متن یا د سورت نوم او آیت شمیره داخل کړئ.',
+                'tafsir_ibn_kathir': 'ابن كثير', 'tafsir_muyassar': 'المیستر', 'sources_heading': 'مرجع سرچینې (د ګوګل لټون پر بنسټ):',
+            },
+            'ur': {
+                'app_title': 'سمارٹ قرآنی آیت ترجمان', 'intro_text': 'برائے مہربانی آؤٹ پٹ زبان اور تفسیر کا طریقہ کار منتخب کریں۔',
+                'section_1_title': '۱. آؤٹ پٹ زبان منتخب کریں:', 'section_2_title': '۲. تفسیر کا طریقہ منتخب کریں:', 'section_3_title': '۳. آیت داخل کریں:',
+                'input_text_label': 'براہ راست آیت کا متن لکھیں:', 'or_separator': 'یا', 'surah_label': 'سورت منتخب کریں:', 
+                'ayah_number_label': 'آیت نمبر:', 'get_tafsir_btn': 'تفسیر حاصل کریں', 'loading_text': 'تفسیر جاری ہے...', 
+                'error_choose': 'برائے مہربانی تفسیر کا طریقہ اور آؤٹ پٹ زبان منتخب کریں۔', 'generated_tafsir_heading': 'پیدا کردہ تفسیر:', 
+                'audio_button_play': 'آڈیو چلائیں', 'audio_button_pause': 'روکیں', 'audio_button_resume': 'دوبارہ شروع کریں',
+                'audio_button_error': 'آڈیو خرابی', 'reset_button': 'نئے آیت کی تفسیر', 'history_heading': 'تفسیر کی تاریخ (مقامی طور پر محفوظ)',
+                'no_history': 'ابھی تک کوئی تاریخ محفوظ نہیں ہے۔', 'clear_history': 'تاریخ صاف کریں', 'error_ayah_input': 'برائے مہربانی آیت کا متن یا سورت کا نام اور آیت نمبر درج کریں۔',
+                'tafsir_ibn_kathir': 'ابن کثیر', 'tafsir_muyassar': 'المیستر', 'sources_heading': 'حوالہ ذرائع (گوگل سرچ گراؤنڈنگ):',
+            },
+            'ce': {
+                'app_title': 'Къинхетамехь тафсирча', 'intro_text': 'ХIинца арахецаран мотт а тафсиран некъ а хоржий.',
+                'section_1_title': '1. Арахецаран мотт хоржий:', 'section_2_title': '2. Тафсиран некъ хоржий:', 'section_3_title': '3. Аят чубохий:',
+                'input_text_label': 'Аят хьалха дIаязде:', 'or_separator': 'Йа', 'surah_label': 'Сурат хоржий:', 
+                'ayah_number_label': 'Аятан номер:', 'get_tafsir_btn': 'Тафсир кара', 'loading_text': 'Тафсир бо...', 
+                'error_choose': 'Тафсиран некъ а мотт а хоржий.', 'generated_tafsir_heading': 'Кхоьллина Тафсир:', 
+                'audio_button_play': 'Аудио ло', 'audio_button_pause': 'Сакхатто', 'audio_button_resume': 'Юхадоло',
+                'audio_button_error': 'Аудио гIалат', 'reset_button': 'Керлачу аятан тафсир:', 'history_heading': 'Тафсирийн истори (юьртахь Iалашдина):',
+                'no_history': 'Iалашдина истори яц.', 'clear_history': 'Истори дIаяккха', 'error_ayah_input': 'Аятан текст я сурат аятан номер чубохий.',
+                'tafsir_ibn_kathir': 'Ибн Касир', 'tafsir_muyassar': 'المیستر', 'sources_heading': 'Хьасташ (Google Search):',
+            }
+        };
+
+
+        // العناصر الأساسية في واجهة المستخدم
+        const ayahTextarea = document.getElementById('ayah-text');
+        const surahNameSelect = document.getElementById('surah-name'); 
+        const ayahNumberInput = document.getElementById('ayah-number');
+        const getTafsirBtn = document.getElementById('get-tafsir-btn');
+        const buttonText = document.getElementById('button-text');
+        const loadingSpinner = document.getElementById('loading-spinner');
+        const errorMessage = document.getElementById('error-message');
+        const resultSection = document.getElementById('result-section');
+        const originalAyahOutput = document.querySelector('#original-ayah-output p.ayah-font'); // تم تعديل المحدد
+        const tafsirTextElement = document.querySelector('.tafsir-text');
+        const infoTableOutput = document.getElementById('info-table-output');
+        const sourcesContainer = document.getElementById('sources-container');
+        const sourcesList = document.getElementById('sources-list');
+        const historyList = document.getElementById('history-list');
+        const noHistory = document.getElementById('no-history');
+        const clearHistoryBtn = document.getElementById('clear-history-btn');
+        const themeToggle = document.getElementById('theme-toggle');
+        const body = document.body;
+        
+        // إعدادات الخط
+        let currentFontSize = 1; // 1 = 1rem (base size)
+        const FONT_STEP = 0.15;
+        const FONT_MAX = 2.0; // تم زيادة الحد الأقصى للتكبير
+        const FONT_MIN = 0.7;
+
+
+        // استماع لأحداث الإدخال لتمكين الزر
+        [ayahTextarea, surahNameSelect, ayahNumberInput].forEach(element => {
+            element.addEventListener('input', checkInputValidity);
+            element.addEventListener('change', checkInputValidity);
+        });
+
+        // ----------------------------------------------------
+        // تعريف الدوال المساعدة الأساسية
+        // ----------------------------------------------------
+
+        function getSystemInstruction(tafsirId, langId) {
+            const tafsirName = tafsirMap[tafsirId] || 'مناهج التفسير المعتمدة';
+            const langName = langMap[langId] || 'باللغة العربية الفصحى';
+
+            // تم تعزيز التعليمات للتركيز على دقة وموثوقية المنهج
+            return `You are a professional and highly accurate Quranic interpreter. Your task is to provide a comprehensive analysis of the requested verse, ensuring the content is theologically sound and strictly adheres to the selected methodology.
+            
+            First, **provide the exact Arabic text of the requested Quranic verse.**
+            
+            Second, **provide a concise table (in Markdown format) with the following mandatory information** about the Surah/Ayah:
+            | المعلومة | القيمة |
+            |:---|:---|
+            | نوع السورة | (مكية أو مدنية) |
+            | سبب النزول | (اذكر بإيجاز سبب النزول إن وجد) |
+            | موقع الآية | (اذكر رقم الجزء ورقم الحزب) |
+            
+            Third, **provide the interpretation** of the verse. The interpretation methodology must adhere STRICTLY and ACCURATELY to ${tafsirName}. The output language for the interpretation (including the table content) must be ${langName}. Make the explanation practical and quick to understand.
+            
+            Structure your response as: [Arabic Ayah] \\n\\n [Markdown Table] \\n\\n [Interpretation]. Ensure the interpretation is suitable for reading aloud.`;
+        }
+
+        // دالة مساعدة لتحويل جدول Markdown إلى HTML
+        function convertMarkdownTableToHtml(markdown, lang) {
+            const rows = markdown.split('\n').filter(line => line.trim().startsWith('|'));
+            if (rows.length < 2) return '';
+
+            const isRtl = ['ar', 'ur', 'ps', 'ce'].includes(lang);
+
+            // تم تعديل تصميم الجدول هنا للتحكم الكامل في الألوان
+            let html = `<div class="overflow-x-auto"><table class="w-full rounded-lg overflow-hidden border border-teal-300 dark:border-teal-700">`;
+            
+            rows.forEach((row, index) => {
+                const cells = row.split('|').map(cell => cell.trim()).filter(cell => cell.length > 0);
+                if (cells.length < 2) return;
+
+                if (index === 0) {
+                    // Header Row - يتم تجاهله هنا لأننا نستخدم CSS لتلوين الخلايا
+                    // نستخدم فقط سطر الفصل لضمان تخطيه
+                } else if (index > 1) { 
+                    // Data Rows (skipping the separator line)
+                    // cells[0] هي "المعلومة"، cells[1] هي "القيمة"
+                    const key = cells[0];
+                    const value = cells.slice(1).join(' | '); // في حال كان هناك أكثر من خلية للقيمة
+
+                    html += `<tr class="border-t border-teal-200 dark:border-teal-800">`;
+                    
+                    // الخلية الأولى: المعلومة (المفتاح) - بلون مختلف
+                    html += `<td class="info-key-cell p-3 ${isRtl ? 'text-right' : 'text-left'} text-gray-700 dark:text-gray-300">${key}</td>`;
+                    
+                    // الخلية الثانية: القيمة (المحتوى) - بلون الخلفية
+                    html += `<td class="info-value-cell p-3 ${isRtl ? 'text-right' : 'text-left'} bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300">${value}</td>`;
+                    
+                    html += `</tr>`;
+                }
+            });
+
+            html += `</table></div>`;
+            return html;
+        }
+
+        
+        // ----------------------------------------------------
+        // وظائف الترجمة (i18n)
+        // ----------------------------------------------------
+        function changeLanguage(langCode) {
+            currentLang = langCode;
+            const currentTranslations = translations[langCode];
+            
+            // 1. تحديد الاتجاه (RTL/LTR)
+            const isRtl = ['ar', 'ur', 'ps', 'ce'].includes(langCode);
+            document.documentElement.setAttribute('lang', langCode);
+            document.documentElement.setAttribute('dir', isRtl ? 'rtl' : 'ltr');
+            document.body.style.textAlign = isRtl ? 'right' : 'left';
+            document.body.style.direction = isRtl ? 'rtl' : 'ltr';
+
+            // 2. ترجمة جميع العناصر التي تحمل مفتاح data-key
+            document.querySelectorAll('[data-key]').forEach(element => {
+                const key = element.getAttribute('data-key');
+                if (currentTranslations[key]) {
+                    if (element.tagName === 'INPUT' && element.type === 'placeholder') {
+                        element.placeholder = currentTranslations[key];
+                    } else if (element.tagName === 'P' && element.id === 'no-history') {
+                        element.textContent = currentTranslations[key];
+                    } else if (key === 'ayah_text' || key === 'surah_name' || key === 'ayah_number') {
+                        // For placeholder texts if needed
+                    } else {
+                        element.textContent = currentTranslations[key];
+                    }
+                }
+            });
+
+            // 3. تحديث placeholder للنصوص
+            if (currentTranslations['input_text_label']) {
+                document.getElementById('ayah-text').placeholder = currentTranslations['input_text_label'].replace(/[^:]+:\s*/, '');
+            }
+            // 4. إعادة تحميل السجل لترجمة النصوص الداخلية (مثل 'المنهج:...')
+            loadHistory();
+            
+            // 5. تعديل اتجاه نتيجة التحكم بالخط والزر الصوتي
+            const resultControls = document.getElementById('result-controls');
+            if (resultControls) {
+                resultControls.style.flexDirection = isRtl ? 'row-reverse' : 'row';
+                resultControls.style.justifyContent = isRtl ? 'flex-start' : 'flex-start';
+            }
+            
+            // 6. تحديث نص زر الصوت بعد الترجمة
+             if (audioPlayer && !audioPlayer.paused) {
+                 document.getElementById('speak-tafsir-text').textContent = currentTranslations.audio_button_pause;
+             } else if (audioPlayer && audioPlayer.paused) {
+                 document.getElementById('speak-tafsir-text').textContent = currentTranslations.audio_button_resume;
+             } else {
+                 document.getElementById('speak-tafsir-text').textContent = currentTranslations.audio_button_play;
+             }
+             
+             // 7. التأكد من حالة زر الإدخال
+             checkInputValidity();
+        }
+        
+        // ----------------------------------------------------
+        // وظائف الوضع الليلي (Dark Mode)
+        // ----------------------------------------------------
+        function toggleTheme() {
+            if (body.classList.contains('dark-mode')) {
+                body.classList.remove('dark-mode');
+                localStorage.setItem('theme', 'light');
+                document.getElementById('sun-icon').classList.remove('hidden');
+                document.getElementById('moon-icon').classList.add('hidden');
+            } else {
+                body.classList.add('dark-mode');
+                localStorage.setItem('theme', 'dark');
+                document.getElementById('sun-icon').classList.add('hidden');
+                document.getElementById('moon-icon').classList.remove('hidden');
+            }
+        }
+        
+        function loadTheme() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            if (savedTheme === 'dark') {
+                body.classList.add('dark-mode');
+                document.getElementById('sun-icon').classList.add('hidden');
+                document.getElementById('moon-icon').classList.remove('hidden');
+            } else {
+                 document.getElementById('sun-icon').classList.remove('hidden');
+                 document.getElementById('moon-icon').classList.add('hidden');
+            }
+        }
+
+        themeToggle.addEventListener('click', toggleTheme);
+        loadTheme();
+
+        // ----------------------------------------------------
+        // وظائف التحكم بحجم الخط
+        // ----------------------------------------------------
+        function changeFontSize(direction) {
+            let newSize = currentFontSize + (direction * FONT_STEP);
+
+            if (newSize > FONT_MAX) newSize = FONT_MAX;
+            if (newSize < FONT_MIN) newSize = FONT_MIN;
+
+            currentFontSize = newSize;
+            tafsirTextElement.style.fontSize = `${currentFontSize}rem`;
+            // تحديث حجم خط جدول المعلومات (عبر الحاوية)
+            document.getElementById('info-table-output').style.fontSize = `${currentFontSize}rem`;
+        }
+
+
+        // ----------------------------------------------------
+        // وظائف معالجة الصوت (TTS)
+        // ----------------------------------------------------
+        let audioPlayer = null; 
+
+        function base64ToArrayBuffer(base64) {
+            const binaryString = atob(base64);
+            const len = binaryString.length;
+            const bytes = new Uint8Array(len);
+            for (let i = 0; i < len; i++) {
+                bytes[i] = binaryString.charCodeAt(i);
+            }
+            return bytes.buffer;
+        }
+
+        function pcmToWav(pcmData, sampleRate) {
+            const buffer = new ArrayBuffer(44 + pcmData.length * 2);
+            const view = new DataView(buffer);
+
+            function writeString(view, offset, string) {
+                for (let i = 0; i < string.length; i++) {
+                    view.setUint8(offset + i, string.charCodeAt(i));
+                }
+            }
+
+            let offset = 0;
+
+            // RIFF identifier
+            writeString(view, offset, 'RIFF'); offset += 4;
+            // file length
+            view.setUint32(offset, 36 + pcmData.length * 2, true); offset += 4;
+            // WAV identifier
+            writeString(view, offset, 'WAVE'); offset += 4;
+            // format chunk identifier
+            writeString(view, offset, 'fmt '); offset += 4;
+            // format chunk length
+            view.setUint32(offset, 16, true); offset += 4;
+            // sample format (raw)
+            view.setUint16(offset, 1, true); offset += 2;
+            // channel count
+            view.setUint16(offset, 1, true); offset += 2; // Mono
+            // sample rate
+            view.setUint32(offset, sampleRate, true); offset += 4;
+            // byte rate (sampleRate * blockAlign)
+            view.setUint32(offset, sampleRate * 2, true); offset += 4;
+            // block align (channels * bytesPerSample)
+            view.setUint16(offset, 2, true); offset += 2; // 16-bit
+            // bits per sample
+            view.setUint16(offset, 16, true); offset += 2;
+            // data chunk identifier
+            writeString(view, offset, 'data'); offset += 4;
+            // data chunk length
+            view.setUint32(offset, pcmData.length * 2, true); offset += 4;
+
+            // Write PCM samples
+            for (let i = 0; i < pcmData.length; i++) {
+                view.setInt16(offset, pcmData[i], true);
+                offset += 2;
+            }
+
+            return new Blob([view], { type: 'audio/wav' });
+        }
+
+        async function callGeminiTtsApi(textToSpeak) {
+            const payload = {
+                contents: [{
+                    parts: [{ text: textToSpeak }]
+                }],
+                generationConfig: {
+                    responseModalities: ["AUDIO"],
+                    speechConfig: {
+                        voiceConfig: {
+                            prebuiltVoiceConfig: { voiceName: "Orus" } // صوت رجل (Firm)
+                        }
+                    }
+                },
+                model: "gemini-2.5-flash-preview-tts"
+            };
+
+            const response = await fetch(TTS_API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) {
+                throw new Error('فشل في توليد الصوت. قد تكون الجملة طويلة جداً أو حدث خطأ في الخادم.');
+            }
+
+            const result = await response.json();
+            const part = result?.candidates?.[0]?.content?.parts?.[0];
+            
+            if (!part || !part.inlineData || !part.inlineData.data) {
+                throw new Error('لم يتم العثور على بيانات صوتية صالحة في الاستجابة.');
+            }
+
+            const audioData = part.inlineData.data;
+            const mimeType = part.inlineData.mimeType;
+
+            const rateMatch = mimeType.match(/rate=(\d+)/);
+            const sampleRate = rateMatch ? parseInt(rateMatch[1], 10) : 16000; 
+
+            const pcmDataBuffer = base64ToArrayBuffer(audioData);
+            const pcm16 = new Int16Array(pcmDataBuffer);
+            const wavBlob = pcmToWav(pcm16, sampleRate);
+            const audioUrl = URL.createObjectURL(wavBlob);
+
+            return audioUrl;
+        }
+
+
+        async function speakTafsir() {
+            const tafsirText = tafsirTextElement.textContent.trim();
+            if (!tafsirText || tafsirText === '...') {
+                return displayError(translations[currentLang].error_ayah_input);
+            }
+            
+            const speakButton = document.getElementById('speak-tafsir-btn');
+            const speakText = document.getElementById('speak-tafsir-text');
+            const audioSpinner = document.getElementById('audio-loading-spinner');
+            const currentTafsirText = tafsirTextElement.textContent.trim();
+
+
+            if (audioPlayer && !audioPlayer.paused) {
+                // Scenario 1: Audio is playing -> Pause
+                audioPlayer.pause();
+                speakText.textContent = translations[currentLang].audio_button_resume;
+                return;
+            }
+
+            audioSpinner.classList.remove('hidden');
+            speakButton.disabled = true;
+            speakText.textContent = translations[currentLang].loading_text; // استخدام نص "جاري التفسير..." كنص مؤقت
+
+            try {
+                let audioUrl;
+                
+                // Scenario 2: Audio is paused or cached -> Resume/Play cached audio
+                if (currentTafsirText === lastTafsirText && lastTafsirAudioUrl) {
+                    // تشغيل من الكاش (أسرع بكثير)
+                    audioUrl = lastTafsirAudioUrl;
+                    if (!audioPlayer) {
+                        audioPlayer = new Audio(audioUrl);
+                    }
+                } else {
+                    // Scenario 3: New Tafsir or cache expired -> Generate new audio
+                    
+                    // تحرير الذاكرة من الكاش القديم قبل التوليد
+                    if (lastTafsirAudioUrl) URL.revokeObjectURL(lastTafsirAudioUrl);
+                    
+                    audioUrl = await callGeminiTtsApi(currentTafsirText);
+                    
+                    // تحديث الكاش
+                    lastTafsirText = currentTafsirText;
+                    lastTafsirAudioUrl = audioUrl; 
+                    
+                    // إعداد مشغل الصوت الجديد
+                    audioPlayer = new Audio(audioUrl);
+
+                    audioPlayer.onended = () => {
+                        speakText.textContent = translations[currentLang].audio_button_play;
+                        audioPlayer = null;
+                    };
+                    
+                    audioPlayer.onplay = () => {
+                        speakText.textContent = translations[currentLang].audio_button_pause;
+                    };
+
+                    audioPlayer.onpause = () => {
+                        speakText.textContent = translations[currentLang].audio_button_resume;
+                    };
+                }
+                
+                audioPlayer.play();
+                speakText.textContent = translations[currentLang].audio_button_pause; // تحديث النص فوراً عند التشغيل
+                
+            } catch (error) {
+                console.error('TTS Error:', error);
+                displayError(translations[currentLang].audio_button_error + ': ' + (error.message || ''));
+                speakText.textContent = translations[currentLang].audio_button_error;
+            } finally {
+                audioSpinner.classList.add('hidden');
+                speakButton.disabled = false;
+            }
+        }
+        // ----------------------------------------------------
+
+        // وظائف السجل المحلي
+        function loadHistory() {
+            const history = JSON.parse(localStorage.getItem('tafsir_history') || '[]');
+            historyList.innerHTML = '';
+            
+            if (!currentLang) {
+                // لا يوجد لغة محددة، لا يمكن تحميل السجل بترجمات صحيحة
+                noHistory.classList.remove('hidden');
+                // clearHistoryBtn.classList.add('hidden'); // تم حذف الزر
+                return;
+            }
+
+            if (history.length === 0) {
+                noHistory.classList.remove('hidden');
+                // clearHistoryBtn.classList.add('hidden'); // تم حذف الزر
+                return;
+            }
+            
+            noHistory.classList.add('hidden');
+            // clearHistoryBtn.classList.remove('hidden'); // تم حذف الزر
+            
+            history.forEach((item, index) => {
+                const div = document.createElement('div');
+                div.className = 'history-item p-3 rounded-lg border cursor-pointer';
+                
+                // البحث عن اسم التفسير واللغة في اللغة الحالية للعرض في السجل
+                const itemTafsirName = translations[item.lang][`tafsir_${item.tafsir}`] || item.tafsir;
+                const itemLangName = translations[item.lang][`section_1_title`].split(':')[0];
+
+
+                div.innerHTML = `
+                    <p class="font-bold text-gray-800 text-base">${translations[currentLang].get_tafsir_btn.split(' ')[0]}: <span class="text-teal-700">${item.query}</span></p>
+                    <p class="text-sm text-gray-500 mt-1">${translations[currentLang].section_2_title.split('.')[1].trim()}: ${itemTafsirName} | ${translations[currentLang].section_1_title.split('.')[1].trim()}: ${itemLangName}</p>
+                `;
+                div.onclick = () => displaySavedTafsir(item);
+                historyList.appendChild(div);
+            });
+        }
+        
+        function saveToHistory(query, tafsir, lang, fullResponse) {
+            let history = JSON.parse(localStorage.getItem('tafsir_history') || '[]');
+            
+            const newItem = { query, tafsir, lang, response: fullResponse, timestamp: new Date().getTime() };
+            history.unshift(newItem);
+            
+            if (history.length > 20) {
+                history = history.slice(0, 20);
+            }
+            
+            localStorage.setItem('tafsir_history', JSON.stringify(history));
+            loadHistory(); 
+        }
+
+        // تم حذف دالة clearHistory() بالكامل بناءً على طلب المستخدم
+
+        function displaySavedTafsir(item) {
+             // Reset audio player state
+            if (audioPlayer) {
+                audioPlayer.pause();
+                audioPlayer = null;
+            }
+
+            // تصفير الكاش عند عرض سجل مختلف
+            lastTafsirText = '';
+            if (lastTafsirAudioUrl) {
+                URL.revokeObjectURL(lastTafsirAudioUrl);
+                lastTafsirAudioUrl = null;
+            }
+            document.getElementById('speak-tafsir-text').textContent = translations[currentLang].audio_button_play;
+
+
+            const parts = item.response.split('\n\n');
+            let originalAyah = translations[currentLang].generated_tafsir_heading;
+            let infoTableHtml = '';
+            let interpretation = item.response;
+
+            if (parts.length >= 3) {
+                originalAyah = parts[0].trim().replace(/\*/g, ''); 
+                const tableMarkdown = parts[1].trim();
+                interpretation = parts.slice(2).join('\n\n').trim();
+                // نستخدم لغة التفسير المخزن لتحويل الجدول إلى HTML بشكل صحيح (RTL/LTR)
+                infoTableHtml = convertMarkdownTableToHtml(tableMarkdown, item.lang); 
+            } else {
+                 interpretation = item.response.replace(/\n/g, '<br>');
+            }
+
+
+            infoTableOutput.innerHTML = infoTableHtml;
+            
+            // التعديل لتنسيق الآية: إزالة البسملة إذا كانت موجودة، ثم إضافتها مرة واحدة فقط فوق الآية
+            const basmala = 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ';
+            const basmala_unvowelized = 'بسم الله الرحمن الرحيم'; // البسملة غير المشكولة
+            
+            // 1. إزالة البسملة المشكولة وغير المشكولة من بداية نص الآية
+            let cleanAyah = originalAyah.replace(new RegExp(`^${basmala}\\s*`, 'i'), '').trim(); 
+            cleanAyah = cleanAyah.replace(new RegExp(`^${basmala_unvowelized}\\s*`, 'i'), '').trim(); 
+            
+            // إضافة البسملة المشكولة في سطر منفصل، ثم الآية في السطر التالي (كأسطر عادية)
+            const ayahContent = `<span class="ayah-word">${basmala}</span><br>` + cleanAyah;
+            originalAyahOutput.innerHTML = ayahContent;
+            
+            tafsirTextElement.innerHTML = interpretation.replace(/\n/g, '<br>');
+            sourcesList.innerHTML = '';
+            sourcesContainer.classList.add('hidden'); 
+
+            resultSection.classList.remove('hidden');
+            errorMessage.classList.add('hidden');
+            
+            // تطبيق حجم الخط الحالي على المحتوى الجديد
+            document.getElementById('info-table-output').style.fontSize = `${currentFontSize}rem`;
+        }
+
+        function checkInputValidity() {
+            // يجب أن تكون currentLang محددة الآن
+            const isLangSelected = currentLang !== null;
+            const hasText = ayahTextarea.value.trim().length > 0;
+            const hasSurahAndNumber = surahNameSelect.value !== "" && ayahNumberInput.value.trim().length > 0;
+            
+            const hasTafsir = !!document.querySelector('input[name="tafsir_type"]:checked');
+            
+            // تمكين الزر إذا كان هناك إدخال صحيح في أي من الحقلين مع اختيار المنهج واللغة
+            if ((hasText || hasSurahAndNumber) && hasTafsir && isLangSelected) {
+                getTafsirBtn.disabled = false;
+            } else {
+                getTafsirBtn.disabled = true;
+            }
+            errorMessage.classList.add('hidden');
+        }
+
+        function showLoading(isLoading) {
+            getTafsirBtn.disabled = isLoading;
+            if (isLoading) {
+                loadingSpinner.classList.remove('hidden');
+                // نستخدم اللغة الحالية لعرض النص
+                buttonText.textContent = translations[currentLang].loading_text;
+            } else {
+                loadingSpinner.classList.add('hidden');
+                // نستخدم اللغة الحالية لعرض النص
+                buttonText.textContent = translations[currentLang].get_tafsir_btn;
+            }
+        }
+
+        function displayError(message) {
+            errorMessage.textContent = message;
+            errorMessage.classList.remove('hidden');
+        }
+        
+        function clearOutput() {
+            infoTableOutput.innerHTML = '';
+            tafsirTextElement.innerHTML = '';
+            // تصفير الآية وإعادة البسملة بشكل صحيح
+            originalAyahOutput.innerHTML = ''; 
+            
+            sourcesList.innerHTML = '';
+            resultSection.classList.add('hidden');
+            sourcesContainer.classList.add('hidden');
+            errorMessage.classList.add('hidden');
+            
+            // تنظيف الكاش ومشغل الصوت
+            if (audioPlayer) {
+                audioPlayer.pause();
+                audioPlayer = null;
+            }
+            if (lastTafsirAudioUrl) {
+                URL.revokeObjectURL(lastTafsirAudioUrl);
+                lastTafsirAudioUrl = null;
+            }
+            lastTafsirText = '';
+            if (currentLang) {
+               document.getElementById('speak-tafsir-text').textContent = translations[currentLang].audio_button_play;
+            }
+            
+            // إعادة حجم خط الجدول والتفسير إلى الحجم الأساسي بعد المسح
+            tafsirTextElement.style.fontSize = `1rem`;
+            document.getElementById('info-table-output').style.fontSize = `1rem`;
+            currentFontSize = 1;
+        }
+        
+        function resetApp() {
+            ayahTextarea.value = '';
+            surahNameSelect.value = '';
+            ayahNumberInput.value = '';
+            clearOutput();
+            checkInputValidity();
+        }
+
+        async function callGeminiApi(prompt, systemPrompt) {
+            const searchQueries = [
+                prompt,
+                "Tafsir of Quran verse based on " + systemPrompt.substring(systemPrompt.indexOf("adhere strictly to") + 18, systemPrompt.indexOf(". The output language"))
+            ];
+            
+            const payload = {
+                contents: [{ parts: [{ text: prompt }] }],
+                tools: [{ "google_search": { queries: searchQueries } }],
+                systemInstruction: {
+                    parts: [{ text: systemPrompt }]
+                },
+            };
+
+            for (let i = 0; i < 3; i++) { 
+                try {
+                    const response = await fetch(API_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    const result = await response.json();
+                    const candidate = result.candidates?.[0];
+
+                    if (candidate && candidate.content?.parts?.[0]?.text) {
+                        const text = candidate.content.parts[0].text;
+                        let sources = [];
+                        
+                        const groundingMetadata = candidate.groundingMetadata;
+                        // تم إصلاح الخطأ هنا: استخدام groundingMetadata.groundingAttributions بدلاً من groundingAttributions
+                        if (groundingMetadata && groundingMetadata.groundingAttributions) {
+                            sources = groundingMetadata.groundingAttributions
+                                .map(attribution => ({
+                                    uri: attribution.web?.uri,
+                                    title: attribution.web?.title,
+                                }))
+                                .filter(source => source.uri && source.title);
+                        }
+
+                        return { text, sources };
+
+                    } else {
+                        throw new Error('لم يتمكن الذكاء الاصطناعي من توليد تفسير لهذه الآية. الرجاء التأكد من صحة الآية أو السورة.');
+                    }
+                } catch (error) {
+                    console.error('API Call Error:', error);
+                    if (i < 2) {
+                        const delay = Math.pow(2, i) * 1000; 
+                        await new Promise(resolve => setTimeout(resolve, delay));
+                    } else {
+                        throw new Error('فشل الاتصال بخدمة الذكاء الاصطناعي بعد عدة محاولات. الرجاء المحاولة لاحقاً.');
+                    }
+                }
+            }
+        }
+
+        async function fetchTafsir() {
+            // 1. قراءة البيانات المدخلة
+            const selectedTafsir = document.querySelector('input[name="tafsir_type"]:checked')?.value;
+            const selectedLanguage = currentLang; // استخدام currentLang
+            const ayahText = ayahTextarea.value.trim();
+            const surahName = surahNameSelect.value; 
+            const ayahNumber = ayahNumberInput.value.trim();
+            
+            if (!selectedTafsir || !selectedLanguage) {
+                // استخدام اللغة الافتراضية للخطأ إذا لم تكن أي لغة محددة
+                const langForError = currentLang || 'ar';
+                return displayError(translations[langForError].error_choose);
+            }
+            
+            let query = '';
+            let prompt = '';
+            if (ayahText) {
+                query = ayahText;
+                prompt = `فسر الآية القرآنية التالية: "${ayahText}".`;
+            } else if (surahName && ayahNumber) {
+                query = `الآية رقم ${ayahNumber} من سورة ${surahName}`;
+                prompt = `فسر الآية رقم ${ayahNumber} من سورة ${surahName}.`;
+            } else {
+                return displayError(translations[currentLang].error_ayah_input);
+            }
+
+            clearOutput(); 
+            showLoading(true);
+
+            // تم إصلاح خطأ المرجع هنا
+            const systemPrompt = getSystemInstruction(selectedTafsir, selectedLanguage);
+
+            try {
+                const { text, sources } = await callGeminiApi(prompt, systemPrompt);
+                
+                // 4. استخلاص نص الآية الأصلي والجدول والتفسير
+                const parts = text.split('\n\n');
+                let originalAyah = '';
+                let infoTableHtml = '';
+                let interpretation = text;
+                
+                // محاولة استخلاص الأجزاء بناءً على الهيكلية المطلوبة: [Ayah]\n\n[Table]\n\n[Interpretation]
+                if (parts.length >= 3) {
+                    originalAyah = parts[0].trim().replace(/\*/g, ''); 
+                    const tableMarkdown = parts[1].trim();
+                    interpretation = parts.slice(2).join('\n\n').trim();
+                    
+                    infoTableHtml = convertMarkdownTableToHtml(tableMarkdown, selectedLanguage);
+                } else {
+                    // إذا فشل الاستخلاص، نعتبر النص تفسيراً
+                    originalAyah = 'الآية الأصلية: ' + query;
+                    interpretation = text;
+                }
+                
+                // 5. عرض النتيجة
+                infoTableOutput.innerHTML = infoTableHtml;
+                
+                // التعديل لتنسيق الآية: إزالة البسملة إذا كانت موجودة، ثم إزالتها يدوياً
+                const basmala = 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ';
+                const basmala_unvowelized = 'بسم الله الرحمن الرحيم'; // البسملة غير المشكولة
+                
+                // 1. إزالة البسملة المشكولة وغير المشكولة من بداية نص الآية
+                let cleanAyah = originalAyah.replace(new RegExp(`^${basmala}\\s*`, 'i'), '').trim(); 
+                cleanAyah = cleanAyah.replace(new RegExp(`^${basmala_unvowelized}\\s*`, 'i'), '').trim(); 
+                
+                // إضافة البسملة المشكولة في سطر منفصل، ثم الآية في السطر التالي (كأسطر عادية)
+                const ayahContent = `<span class="ayah-word">${basmala}</span><br>` + cleanAyah;
+                originalAyahOutput.innerHTML = ayahContent;
+
+                tafsirTextElement.innerHTML = interpretation.replace(/\n/g, '<br>'); 
+                resultSection.classList.remove('hidden');
+                
+                // 6. حفظ النتيجة كاملة في السجل المحلي
+                saveToHistory(query, selectedTafsir, selectedLanguage, text); 
+                
+                // تنظيف الكاش الصوتي لأن التفسير تغير
+                if (lastTafsirAudioUrl) {
+                    URL.revokeObjectURL(lastTafsirAudioUrl);
+                }
+                lastTafsirAudioUrl = null;
+                lastTafsirText = '';
+
+
+                // 7. عرض المصادر
+                sourcesList.innerHTML = '';
+                if (sources.length > 0) {
+                    sources.forEach(source => {
+                        const li = document.createElement('li');
+                        const a = document.createElement('a');
+                        a.href = source.uri;
+                        a.textContent = source.title || source.uri;
+                        a.target = "_blank";
+                        a.className = "text-blue-600 hover:text-blue-800 underline transition duration-150 block";
+                        li.appendChild(a);
+                        sourcesList.appendChild(li);
+                    });
+                    sourcesContainer.classList.remove('hidden');
+                } else {
+                     sourcesContainer.classList.add('hidden');
+                }
+
+            } catch (e) {
+                console.error(e);
+                displayError(e.message || translations[currentLang].error_ayah_input);
+            } finally {
+                showLoading(false);
+            }
+        }
+        
+        // تفعيل الزر وتحميل السجل عند تحميل الصفحة
+        document.addEventListener('DOMContentLoaded', () => {
+            populateSurahDropdown();
+            
+            // تحديد اللغة الافتراضية: لا شيء محدد، ونترك الواجهة على العربية حتى يختار المستخدم
+            // currentLang = null; 
+            
+            checkInputValidity();
+            loadHistory();
+        });
+
+    </script>
+</body>
+</html>
